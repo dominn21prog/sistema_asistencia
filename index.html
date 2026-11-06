@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -23,7 +22,7 @@
         }
     </script>
     <!-- Librería para generar códigos QR reales -->
-    <script src="https://cdnjs.cloudflare.com/ajax5/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-crema text-gray-900 min-h-screen flex flex-col justify-between font-sans">
 
@@ -210,8 +209,7 @@
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-black text-gray-800 text-lg">Historial y Estadísticas Generales</h3>
                             <div class="space-x-2">
-                                <button onclick="exportCSV()" class="bg-gray-800 text-white px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-black">Exportar a CSV</button>
-                                <button onclick="window.print()" class="bg-violetaClaro text-violetaFuturista px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-violeta-200">Imprimir / PDF</button>
+                                <button onclick="window.print()" class="bg-violetaFuturista text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-violetaOscuro">Descargar / Ver en PDF</button>
                             </div>
                         </div>
                         <div id="reports-content" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -246,6 +244,11 @@
 
     <!-- LÓGICA JAVASCRIPT -->
     <script>
+        // Función auxiliar para normalizar texto (quitar acentos y pasar a minúsculas para búsquedas perfectas)
+        function normalizeText(text) {
+            return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
         // Base de Datos en LocalStorage del Navegador
         let students = JSON.parse(localStorage.getItem('sa_students')) || [
             { id: 1, dni: '45123456', apellido: 'Gómez', nombre: 'Lucas', anio: '1', division: 'A' },
@@ -341,10 +344,14 @@
 
         function renderStudents() {
             const tbody = document.getElementById('students-table-body');
-            const filter = document.getElementById('search-student')?.value.toLowerCase() || '';
+            const rawFilter = document.getElementById('search-student')?.value || '';
+            const filter = normalizeText(rawFilter);
             tbody.innerHTML = '';
             
-            const filtered = students.filter(s => s.dni.includes(filter) || s.apellido.toLowerCase().includes(filter));
+            const filtered = students.filter(s => {
+                const combined = normalizeText(`${s.dni} ${s.apellido} ${s.nombre}`);
+                return combined.includes(filter);
+            });
             
             if(filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">No se encontraron estudiantes.</td></tr>`;
@@ -389,7 +396,6 @@
             }
 
             courseStudents.forEach(s => {
-                // Verificar si ya tiene asistencia guardada para esta fecha
                 const existing = attendance.find(a => a.id_estudiante === s.id && a.fecha === fecha);
                 const estadoActual = existing ? existing.estado : 'P';
 
@@ -416,13 +422,11 @@
 
             if(courseStudents.length === 0) return;
 
-            // Filtrar y actualizar registros evitando duplicados para la misma fecha
             courseStudents.forEach(s => {
                 const radios = document.querySelectorAll(`input[name="att-${s.id}"]`);
                 let estadoSeleccionado = 'P';
                 radios.forEach(r => { if(r.checked) estadoSeleccionado = r.value; });
 
-                // Remover registro previo del mismo día si existe
                 attendance = attendance.filter(a => !(a.id_estudiante === s.id && a.fecha === fecha));
 
                 attendance.push({
@@ -472,20 +476,6 @@
                     </tr>
                 `;
             });
-        }
-
-        function exportCSV() {
-            let csv = 'Fecha,Estudiante,Curso,Estado\n';
-            attendance.forEach(att => {
-                const student = students.find(s => s.id === att.id_estudiante);
-                const name = student ? `${student.apellido} ${student.nombre}` : 'Desconocido';
-                csv += `${att.fecha},"${name}",${att.curso},${att.estado}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "reporte_asistencia.csv";
-            link.click();
         }
     </script>
 </body>
