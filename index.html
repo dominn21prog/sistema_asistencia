@@ -23,6 +23,8 @@
     </script>
     <!-- Librería para generar códigos QR reales -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Librería para generar y descargar PDF directamente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="bg-crema text-gray-900 min-h-screen flex flex-col justify-between font-sans">
 
@@ -209,7 +211,8 @@
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-black text-gray-800 text-lg">Historial y Estadísticas Generales</h3>
                             <div class="space-x-2">
-                                <button onclick="window.print()" class="bg-violetaFuturista text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-violetaOscuro">Descargar / Ver en PDF</button>
+                                <button onclick="downloadPDF()" class="bg-violetaFuturista text-white px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-violetaOscuro">Descargar PDF</button>
+                                <button onclick="window.print()" class="bg-violetaClaro text-violetaFuturista px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-purple-200">Imprimir / Ver</button>
                             </div>
                         </div>
                         <div id="reports-content" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -244,22 +247,19 @@
 
     <!-- LÓGICA JAVASCRIPT -->
     <script>
-        // Función auxiliar para normalizar texto (quitar acentos y pasar a minúsculas para búsquedas perfectas)
+        // Función para normalizar texto (quita tildes y pasa a minúsculas)
         function normalizeText(text) {
             return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        // Base de Datos en LocalStorage del Navegador
         let students = JSON.parse(localStorage.getItem('sa_students')) || [
             { id: 1, dni: '45123456', apellido: 'Gómez', nombre: 'Lucas', anio: '1', division: 'A' },
             { id: 2, dni: '45678901', apellido: 'Pérez', nombre: 'Sofía', anio: '1', division: 'A' }
         ];
         let attendance = JSON.parse(localStorage.getItem('sa_attendance')) || [];
 
-        // Inicializar fecha actual en el selector de asistencia
         document.getElementById('att-fecha').valueAsDate = new Date();
 
-        // Generador de QR dinámico y seguro para iOS/iPhone
         let qrcodeObj = null;
         function initQR(customUrl = '') {
             const qrContainer = document.getElementById('qrcode');
@@ -281,12 +281,9 @@
                 qrContainer.innerHTML = `<a href="${targetUrl}" target="_blank" class="text-xs text-violetaFuturista underline font-bold">Abrir enlace web</a>`;
             }
         }
-        function updateQRUrl(val) {
-            initQR(val);
-        }
+        function updateQRUrl(val) { initQR(val); }
         initQR();
 
-        // Autenticación simple
         function handleLogin(e) {
             e.preventDefault();
             const user = document.getElementById('user').value;
@@ -305,7 +302,6 @@
             initQR();
         }
 
-        // Navegación entre pestañas
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
@@ -319,7 +315,6 @@
             if(tabName === 'reportes') renderReports();
         }
 
-        // CRUD Estudiantes
         function addStudent(e) {
             e.preventDefault();
             const dni = document.getElementById('est-dni').value;
@@ -380,7 +375,6 @@
             }
         }
 
-        // Toma de Asistencia
         function loadAttendanceList() {
             const anio = document.getElementById('att-anio').value;
             const division = document.getElementById('att-division').value;
@@ -441,7 +435,6 @@
             alert('¡Asistencia guardada correctamente en el sistema!');
         }
 
-        // Reportes y Estadísticas
         function renderReports() {
             const tbody = document.getElementById('reports-table-body');
             const statsContainer = document.getElementById('reports-content');
@@ -476,6 +469,54 @@
                     </tr>
                 `;
             });
+        }
+
+        // Función para descargar el PDF directamente al dispositivo
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("Reporte de Asistencia Escolar", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Fecha de generacion: ${new Date().toLocaleDateString()}`, 14, 28);
+            doc.text("Desarrollado por: Domingo Tardino, Marcos Gigena y Laucha", 14, 34);
+
+            let y = 45;
+            doc.setFont("helvetica", "bold");
+            doc.text("Fecha", 14, y);
+            doc.text("Estudiante", 50, y);
+            doc.text("Curso", 120, y);
+            doc.text("Estado", 160, y);
+            
+            doc.line(14, y + 2, 195, y + 2);
+            y += 8;
+
+            doc.setFont("helvetica", "normal");
+            if (attendance.length === 0) {
+                doc.text("No hay registros de asistencia disponibles.", 14, y);
+            } else {
+                attendance.forEach(att => {
+                    const student = students.find(s => s.id === att.id_estudiante);
+                    const name = student ? `${student.apellido}, ${student.nombre}` : 'Desconocido';
+                    
+                    if (y > 280) {
+                        doc.addPage();
+                        y = 20;
+                    }
+
+                    doc.text(String(att.fecha), 14, y);
+                    doc.text(String(name), 50, y);
+                    doc.text(String(att.curso), 120, y);
+                    doc.text(String(att.estado), 160, y);
+                    y += 7;
+                });
+            }
+
+            doc.save("reporte_asistencia.pdf");
         }
     </script>
 </body>
