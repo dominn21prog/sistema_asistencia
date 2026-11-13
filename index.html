@@ -37,14 +37,14 @@
                 <div class="text-center mb-6">
                     <span class="bg-violetaClaro text-violetaFuturista text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Seguridad Institucional</span>
                     <h1 id="auth-title" class="text-2xl font-black text-gray-900 mt-2">Acceso Preceptores</h1>
-                    <p id="auth-subtitle" class="text-sm text-gray-500">Ingrese sus credenciales autorizadas</p>
+                    <p id="auth-subtitle" class="text-sm text-gray-500">Ingrese su DNI y contraseña autorizada</p>
                 </div>
                 
                 <!-- Formulario de Inicio de Sesión -->
                 <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Usuario / DNI</label>
-                        <input type="text" id="login-user" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violetaFuturista bg-crema text-sm" placeholder="Ej: preceptor1">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">DNI del Preceptor (Usuario)</label>
+                        <input type="text" id="login-dni" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violetaFuturista bg-crema text-sm" placeholder="Ej: 35123456">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Contraseña</label>
@@ -54,26 +54,26 @@
                         Ingresar al Sistema
                     </button>
                     <div class="text-center mt-3">
-                        <button type="button" onclick="toggleAuthMode('register')" class="text-xs text-violetaFuturista font-bold hover:underline">¿Es nuevo preceptor? Registrarse con Clave Institucional</button>
+                        <button type="button" onclick="toggleAuthMode('register')" class="text-xs text-violetaFuturista font-bold hover:underline">¿Nuevo preceptor? Registrarse con Clave Institucional</button>
                     </div>
                 </form>
 
                 <!-- Formulario de Registro Seguro -->
                 <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre Completo</label>
-                        <input type="text" id="reg-nombre" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-crema text-sm" placeholder="Ej: María Gómez">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre y Apellido</label>
+                        <input type="text" id="reg-nombre" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-crema text-sm" placeholder="Ej: Carlos Gómez">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre de Usuario</label>
-                        <input type="text" id="reg-user" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-crema text-sm" placeholder="Ej: mgomez">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">DNI (Será su Usuario)</label>
+                        <input type="text" id="reg-dni" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-crema text-sm" placeholder="Ej: 35123456">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Contraseña</label>
                         <input type="password" id="reg-pass" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-crema text-sm" placeholder="••••••••">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-red-600 uppercase mb-1">Clave Secreta de Preceptor (Admin)</label>
+                        <label class="block text-xs font-bold text-red-600 uppercase mb-1">Clave Secreta Institucional</label>
                         <input type="password" id="reg-secret" required class="w-full px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 text-sm" placeholder="Código provisto por dirección">
                     </div>
                     <button type="submit" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 text-sm">
@@ -119,6 +119,7 @@
                     <button onclick="switchTab('estudiantes')" id="btn-tab-estudiantes" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-xs bg-violetaFuturista text-white shadow-md transition">Gestión de Estudiantes</button>
                     <button onclick="switchTab('asistencia')" id="btn-tab-asistencia" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-xs bg-white text-gray-600 hover:bg-gray-100 transition">Tomar Asistencia</button>
                     <button onclick="switchTab('reportes')" id="btn-tab-reportes" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-xs bg-white text-gray-600 hover:bg-gray-100 transition">Consultas y Reportes</button>
+                    <button onclick="switchTab('auditoria')" id="btn-tab-auditoria" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-xs bg-white text-gray-600 hover:bg-gray-100 transition">Registro de Inicios de Sesión</button>
                 </div>
 
                 <!-- SECCIÓN 1: ESTUDIANTES -->
@@ -266,6 +267,36 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- SECCIÓN 4: AUDITORÍA DE INICIOS DE SESIÓN -->
+                <div id="tab-auditoria" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="font-black text-gray-800 text-lg">Registro de Inicios de Sesión (Auditoría)</h3>
+                                <p class="text-xs text-gray-500">Historial de accesos de preceptores al sistema por DNI y Nombre</p>
+                            </div>
+                            <div class="space-x-2">
+                                <button onclick="downloadLoginAuditPDF()" class="bg-violetaFuturista text-white px-4 py-2 rounded-xl text-xs font-bold shadow hover:bg-violetaOscuro">Descargar PDF de Accesos</button>
+                                <button onclick="clearLoginHistory()" class="bg-red-50 text-red-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-100">Limpiar Historial</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-crema text-gray-600 border-b border-gray-200">
+                                        <th class="p-3">Fecha y Hora</th>
+                                        <th class="p-3">DNI del Preceptor (Usuario)</th>
+                                        <th class="p-3">Nombre y Apellido</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="audit-table-body" class="divide-y divide-gray-100">
+                                    <!-- Se llena con JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -278,17 +309,15 @@
 
     <!-- LÓGICA JAVASCRIPT -->
     <script>
-        // Clave secreta estricta institucional para registrar cuentas nuevas de preceptor
         const CLAVE_PRECEPTOR_SECRETA = "preceptor2026";
 
-        // Función para normalizar texto (quita tildes y pasa a minúsculas)
         function normalizeText(text) {
             return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        // Base de datos de preceptores inicial por defecto si no existe
+        // Base de datos de preceptores (Usuario = DNI)
         let preceptores = JSON.parse(localStorage.getItem('sa_preceptores')) || [
-            { usuario: 'admin', pass: 'admin123', nombre: 'Administrador General' }
+            { dni: '12345678', pass: 'admin123', nombre: 'Administrador General' }
         ];
 
         let students = JSON.parse(localStorage.getItem('sa_students')) || [
@@ -296,6 +325,7 @@
             { id: 2, dni: '45678901', apellido: 'Pérez', nombre: 'Sofía', anio: '1', division: 'A' }
         ];
         let attendance = JSON.parse(localStorage.getItem('sa_attendance')) || [];
+        let loginHistory = JSON.parse(localStorage.getItem('sa_login_history')) || [];
 
         document.getElementById('att-fecha').valueAsDate = new Date();
 
@@ -323,7 +353,6 @@
         function updateQRUrl(val) { initQR(val); }
         initQR();
 
-        // Control de pantallas de Autenticación (Login / Registro)
         function toggleAuthMode(mode) {
             const loginForm = document.getElementById('form-login');
             const regForm = document.getElementById('form-register');
@@ -334,59 +363,67 @@
                 loginForm.classList.add('hidden');
                 regForm.classList.remove('hidden');
                 title.innerText = "Nuevo Preceptor";
-                subtitle.innerText = "Complete los datos y la clave institucional";
+                subtitle.innerText = "Complete sus datos y la clave institucional";
             } else {
                 regForm.classList.add('hidden');
                 loginForm.classList.remove('hidden');
                 title.innerText = "Acceso Preceptores";
-                subtitle.innerText = "Ingrese sus credenciales autorizadas";
+                subtitle.innerText = "Ingrese su DNI y contraseña autorizada";
             }
         }
 
-        // Registro seguro de nuevos preceptores
         function handleRegister(e) {
             e.preventDefault();
             const nombre = document.getElementById('reg-nombre').value.trim();
-            const usuario = document.getElementById('reg-user').value.trim().toLowerCase();
+            const dni = document.getElementById('reg-dni').value.trim();
             const pass = document.getElementById('reg-pass').value;
             const secret = document.getElementById('reg-secret').value;
 
             if(secret !== CLAVE_PRECEPTOR_SECRETA) {
-                alert('⚠️ Clave secreta de preceptor incorrecta. No se puede crear la cuenta sin autorización.');
+                alert('⚠️ Clave secreta institucional incorrecta. No se puede registrar la cuenta.');
                 return;
             }
 
-            if(preceptores.some(p => p.usuario === usuario)) {
-                alert('⚠️ El nombre de usuario ya se encuentra registrado.');
+            if(preceptores.some(p => p.dni === dni)) {
+                alert('⚠️ Ya existe un preceptor registrado con ese DNI.');
                 return;
             }
 
-            preceptores.push({ usuario, pass, nombre });
+            preceptores.push({ dni, pass, nombre });
             localStorage.setItem('sa_preceptores', JSON.stringify(preceptores));
-            alert('¡Cuenta de preceptor registrada con éxito! Ya puede iniciar sesión.');
+            alert('¡Cuenta registrada con éxito! Ya puede iniciar sesión con su DNI.');
             document.getElementById('form-register').reset();
             toggleAuthMode('login');
         }
 
-        // Inicio de sesión seguro
         function handleLogin(e) {
             e.preventDefault();
-            const usuarioInput = document.getElementById('login-user').value.trim().toLowerCase();
+            const dniInput = document.getElementById('login-dni').value.trim();
             const passInput = document.getElementById('login-pass').value;
 
-            const preceptorValido = preceptores.find(p => p.usuario === usuarioInput && p.pass === passInput);
+            const preceptorValido = preceptores.find(p => p.dni === dniInput && p.pass === passInput);
 
             if(!preceptorValido) {
-                alert('❌ Acceso Denegado: Usuario o contraseña incorrectos.');
+                alert('❌ Acceso Denegado: DNI o contraseña incorrectos.');
                 return;
             }
 
-            document.getElementById('user-display').innerText = `Preceptor: ${preceptorValido.nombre}`;
+            // Registrar inicio de sesión en auditoría
+            const fechaHora = new Date().toLocaleString();
+            loginHistory.push({
+                fechaHora: fechaHora,
+                dni: preceptorValido.dni,
+                nombre: preceptorValido.nombre
+            });
+            localStorage.setItem('sa_login_history', JSON.stringify(loginHistory));
+
+            document.getElementById('user-display').innerText = `Preceptor: ${preceptorValido.nombre} (DNI: ${preceptorValido.dni})`;
             document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('view-dashboard').classList.remove('hidden');
             renderStudents();
             loadAttendanceList();
             renderReports();
+            renderAudit();
         }
 
         function logout() {
@@ -407,6 +444,7 @@
             activeBtn.classList.remove('bg-white', 'text-gray-600');
             activeBtn.classList.add('bg-violetaFuturista', 'text-white', 'shadow-md');
             if(tabName === 'reportes') renderReports();
+            if(tabName === 'auditoria') renderAudit();
         }
 
         function addStudent(e) {
@@ -565,6 +603,35 @@
             });
         }
 
+        // Renderizar tabla de Auditoría de Inicios de Sesión
+        function renderAudit() {
+            const tbody = document.getElementById('audit-table-body');
+            tbody.innerHTML = '';
+
+            if(loginHistory.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-400">No hay registros de inicio de sesión aún.</td></tr>`;
+                return;
+            }
+
+            loginHistory.slice().reverse().forEach(item => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-crema border-b border-gray-100">
+                        <td class="p-3 font-medium text-gray-600">${item.fechaHora}</td>
+                        <td class="p-3 font-bold text-violetaFuturista">${item.dni}</td>
+                        <td class="p-3">${item.nombre}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function clearLoginHistory() {
+            if(confirm('¿Desea borrar todo el historial de inicios de sesión?')) {
+                loginHistory = [];
+                localStorage.removeItem('sa_login_history');
+                renderAudit();
+            }
+        }
+
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -610,6 +677,49 @@
             }
 
             doc.save("reporte_asistencia.pdf");
+        }
+
+        // Descargar PDF exclusivo de auditoría de accesos
+        function downloadLoginAuditPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("Registro de Inicios de Sesión - Auditoría de Preceptores", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Fecha de generacion: ${new Date().toLocaleDateString()}`, 14, 28);
+            doc.text("Sistema de Control Institucional", 14, 34);
+
+            let y = 45;
+            doc.setFont("helvetica", "bold");
+            doc.text("Fecha y Hora", 14, y);
+            doc.text("DNI (Usuario)", 80, y);
+            doc.text("Nombre y Apellido", 120, y);
+            
+            doc.line(14, y + 2, 195, y + 2);
+            y += 8;
+
+            doc.setFont("helvetica", "normal");
+            if (loginHistory.length === 0) {
+                doc.text("No hay registros de acceso disponibles.", 14, y);
+            } else {
+                loginHistory.forEach(item => {
+                    if (y > 280) {
+                        doc.addPage();
+                        y = 20;
+                    }
+
+                    doc.text(String(item.fechaHora), 14, y);
+                    doc.text(String(item.dni), 80, y);
+                    doc.text(String(item.nombre), 120, y);
+                    y += 7;
+                });
+            }
+
+            doc.save("auditoria_inicios_sesion.pdf");
         }
     </script>
 </body>
