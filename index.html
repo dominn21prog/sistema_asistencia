@@ -30,27 +30,58 @@
 
     <!-- CONTENEDOR PRINCIPAL -->
     <div id="app" class="flex-grow">
-        <!-- VISTA: LOGIN -->
-        <div id="view-login" class="flex items-center justify-center min-h-[80vh] px-4">
+        
+        <!-- VISTA: LOGIN / REGISTRO -->
+        <div id="view-auth" class="flex items-center justify-center min-h-[80vh] px-4">
             <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-violetaClaro">
                 <div class="text-center mb-6">
-                    <span class="bg-violetaClaro text-violetaFuturista text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Sistema Escolar</span>
-                    <h1 class="text-2xl font-black text-gray-900 mt-2">Control de Asistencia</h1>
-                    <p class="text-sm text-gray-500">Inicia sesión para gestionar cursos y alumnos</p>
+                    <span class="bg-violetaClaro text-violetaFuturista text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Seguridad Institucional</span>
+                    <h1 id="auth-title" class="text-2xl font-black text-gray-900 mt-2">Acceso Preceptores</h1>
+                    <p id="auth-subtitle" class="text-sm text-gray-500">Ingrese sus credenciales autorizadas</p>
                 </div>
                 
+                <!-- Formulario de Inicio de Sesión -->
                 <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Usuario</label>
-                        <input type="text" id="user" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violetaFuturista bg-crema text-sm" placeholder="Ej: admin">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Usuario / DNI</label>
+                        <input type="text" id="login-user" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violetaFuturista bg-crema text-sm" placeholder="Ej: preceptor1">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Contraseña</label>
-                        <input type="password" id="pass" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violetaFuturista bg-crema text-sm" placeholder="••••••••">
+                        <input type="password" id="login-pass" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violetaFuturista bg-crema text-sm" placeholder="••••••••">
                     </div>
                     <button type="submit" class="w-full bg-violetaFuturista hover:bg-violetaOscuro text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 text-sm">
                         Ingresar al Sistema
                     </button>
+                    <div class="text-center mt-3">
+                        <button type="button" onclick="toggleAuthMode('register')" class="text-xs text-violetaFuturista font-bold hover:underline">¿Es nuevo preceptor? Registrarse con Clave Institucional</button>
+                    </div>
+                </form>
+
+                <!-- Formulario de Registro Seguro -->
+                <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre Completo</label>
+                        <input type="text" id="reg-nombre" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-crema text-sm" placeholder="Ej: María Gómez">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre de Usuario</label>
+                        <input type="text" id="reg-user" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-crema text-sm" placeholder="Ej: mgomez">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Contraseña</label>
+                        <input type="password" id="reg-pass" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-crema text-sm" placeholder="••••••••">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-red-600 uppercase mb-1">Clave Secreta de Preceptor (Admin)</label>
+                        <input type="password" id="reg-secret" required class="w-full px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 text-sm" placeholder="Código provisto por dirección">
+                    </div>
+                    <button type="submit" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 text-sm">
+                        Registrar Cuenta Segura
+                    </button>
+                    <div class="text-center mt-3">
+                        <button type="button" onclick="toggleAuthMode('login')" class="text-xs text-violetaFuturista font-bold hover:underline">← Volver al Inicio de Sesión</button>
+                    </div>
                 </form>
 
                 <div class="mt-8 pt-6 border-t border-gray-100 text-center">
@@ -72,7 +103,7 @@
                     <div class="bg-violetaFuturista text-white font-black p-2 rounded-xl text-sm">SA</div>
                     <div>
                         <h2 class="font-bold text-gray-800 text-base">Gestión de Asistencia</h2>
-                        <span class="text-xs text-violetaFuturista font-semibold">Panel Administrativo</span>
+                        <span class="text-xs text-violetaFuturista font-semibold">Panel de Control Seguro - Preceptor</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -247,10 +278,18 @@
 
     <!-- LÓGICA JAVASCRIPT -->
     <script>
+        // Clave secreta estricta institucional para registrar cuentas nuevas de preceptor
+        const CLAVE_PRECEPTOR_SECRETA = "preceptor2026";
+
         // Función para normalizar texto (quita tildes y pasa a minúsculas)
         function normalizeText(text) {
             return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
+
+        // Base de datos de preceptores inicial por defecto si no existe
+        let preceptores = JSON.parse(localStorage.getItem('sa_preceptores')) || [
+            { usuario: 'admin', pass: 'admin123', nombre: 'Administrador General' }
+        ];
 
         let students = JSON.parse(localStorage.getItem('sa_students')) || [
             { id: 1, dni: '45123456', apellido: 'Gómez', nombre: 'Lucas', anio: '1', division: 'A' },
@@ -284,11 +323,66 @@
         function updateQRUrl(val) { initQR(val); }
         initQR();
 
+        // Control de pantallas de Autenticación (Login / Registro)
+        function toggleAuthMode(mode) {
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-register');
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+
+            if(mode === 'register') {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                title.innerText = "Nuevo Preceptor";
+                subtitle.innerText = "Complete los datos y la clave institucional";
+            } else {
+                regForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                title.innerText = "Acceso Preceptores";
+                subtitle.innerText = "Ingrese sus credenciales autorizadas";
+            }
+        }
+
+        // Registro seguro de nuevos preceptores
+        function handleRegister(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const usuario = document.getElementById('reg-user').value.trim().toLowerCase();
+            const pass = document.getElementById('reg-pass').value;
+            const secret = document.getElementById('reg-secret').value;
+
+            if(secret !== CLAVE_PRECEPTOR_SECRETA) {
+                alert('⚠️ Clave secreta de preceptor incorrecta. No se puede crear la cuenta sin autorización.');
+                return;
+            }
+
+            if(preceptores.some(p => p.usuario === usuario)) {
+                alert('⚠️ El nombre de usuario ya se encuentra registrado.');
+                return;
+            }
+
+            preceptores.push({ usuario, pass, nombre });
+            localStorage.setItem('sa_preceptores', JSON.stringify(preceptores));
+            alert('¡Cuenta de preceptor registrada con éxito! Ya puede iniciar sesión.');
+            document.getElementById('form-register').reset();
+            toggleAuthMode('login');
+        }
+
+        // Inicio de sesión seguro
         function handleLogin(e) {
             e.preventDefault();
-            const user = document.getElementById('user').value;
-            document.getElementById('user-display').innerText = `Usuario: ${user}`;
-            document.getElementById('view-login').classList.add('hidden');
+            const usuarioInput = document.getElementById('login-user').value.trim().toLowerCase();
+            const passInput = document.getElementById('login-pass').value;
+
+            const preceptorValido = preceptores.find(p => p.usuario === usuarioInput && p.pass === passInput);
+
+            if(!preceptorValido) {
+                alert('❌ Acceso Denegado: Usuario o contraseña incorrectos.');
+                return;
+            }
+
+            document.getElementById('user-display').innerText = `Preceptor: ${preceptorValido.nombre}`;
+            document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('view-dashboard').classList.remove('hidden');
             renderStudents();
             loadAttendanceList();
@@ -297,7 +391,7 @@
 
         function logout() {
             document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-login').classList.remove('hidden');
+            document.getElementById('view-auth').classList.remove('hidden');
             document.getElementById('form-login').reset();
             initQR();
         }
@@ -471,7 +565,6 @@
             });
         }
 
-        // Función para descargar el PDF directamente al dispositivo
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
